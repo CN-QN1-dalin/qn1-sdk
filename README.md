@@ -122,8 +122,8 @@ pip install guiyuan-lock
 | 方案 | 价格 | 说明 |
 |------|------|:----:|
 | **QN1 Free** | ¥0 | MLX RingBuffer · 4bit · 7B · 32K |
-| **QN1 Pro 月付** | ¥9.9/月 | 全量化 · 全模型 · 128K · PyTorch hetero |
-| **QN1 Pro 年付** | ¥49.9/年 | Pro × 12 → 省 ¥69 |
+| **QN1 Pro 月付** | ¥99/月 | 全量化 · 全模型 · 128K · PyTorch hetero |
+| **QN1 Pro 年付** | ¥980/年 | Pro × 12 → 省 ¥208 |
 
 > 购买 → [ClawHub](https://clawhub.com) · 搜索 `qn1`
 
