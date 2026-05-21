@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qn1"
+version = "1.1.0-beta"
+description = "QN1 — 念动幻化 全域核心引擎。零训练猴补注意力，一行代码替换，三端统一API"
+readme = "README.md"
+license = {text = "Proprietary"}
+authors = [
+    {name = "CN_SJZ-QN1-大林", email = "contact@qn1.ai"}
+]
+keywords = ["mlx", "llm", "attention", "inference", "optimization", "edge-ai", "encryption", "anti-piracy"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: Proprietary",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Security :: Cryptography",
+]
+
+# ══════════════════════════════════════════════════════
+# 依赖分层 — core 最少，按后端按需安装
+# ══════════════════════════════════════════════════════
+dependencies = [
+    "numpy>=1.24",
+]
+
+[project.optional-dependencies]
+mlx = ["mlx>=0.31", "mlx_lm>=0.31"]
+torch = ["torch>=2.0"]
+gguf = ["llama-cpp-python>=0.3"]
+# 全量（安装所有后端）
+all = [
+    "mlx>=0.31", "mlx_lm>=0.31",
+    "torch>=2.0",
+    "llama-cpp-python>=0.3",
+]
+dev = ["pytest>=7.0"]
+
+[project.urls]
+Homepage = "https://qn1.ai"
+Documentation = "https://qn1.ai/docs"
+Repository = "https://github.com/qn1-ai/qn1-sdk"
+Changelog = "https://qn1.ai/changelog"
+
+# ══════════════════════════════════════════════════════
+# 打包：只打包 qn1/ 目录
+# ══════════════════════════════════════════════════════
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["qn1*", "pyarmor_runtime_*"]
+exclude = ["tests*", "docs*"]
+
+[tool.setuptools.package-data]
+qn1 = ["py.typed", "taichi_lock/_keystone.dylib"]
+pyarmor_runtime_000000 = ["*"]
+
+[project.scripts]
+qn1 = "qn1.cli:main"
+qn1-license = "qn1.license:main"
+qn1-trial = "qn1.trial:main"
