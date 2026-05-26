@@ -1,173 +1,80 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/CN-QN1-dalin/qn1-sdk/main/docs/assets/qn1_logo.svg" alt="QN1 Logo" width="200"/>
-</p>
+# QN1 — 念动幻化
 
-# QN1 — 念动幻化 · 全域核心引擎
+**AI inference without limits. Consumer hardware. Production speed.**
 
-> **一行替换，零训练无损，三端统一 API**
-
-[![PyPI](https://img.shields.io/badge/pypi-qn1-blue)](https://pypi.org/project/qn1/)
-[![License](https://img.shields.io/badge/license-Proprietary-red)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-macOS%20|%20Linux%20|%20Windows-lightgrey)]()
+[![PR](https://img.shields.io/badge/llama.cpp-PR%20%2323743-blue)](https://github.com/ggml-org/llama.cpp/pull/23743)
+[![License](https://img.shields.io/badge/license-MIT%20%2B%20Commercial-blue)](LICENSE)
 
 ---
 
-## 📦 安装
+## What We Do
 
-```bash
-# MLX 后端（推荐 macOS）
-pip install qn1
+QN1 optimizes LLM inference on consumer devices (MacBooks, phones, edge) through **attention architecture innovation** — not model compression, not cloud offload.
 
-# GGUF 后端（CPU 推理）
-pip install qn1[gguf]
+Our core insight: the bottleneck isn't compute, it's **memory architecture**. Standard attention is O(n) — every new token attends to all previous tokens. We make it O(1).
 
-# PyTorch 后端（GPU 推理）
-pip install qn1[torch]
+## Open Source Projects
 
-# 全部后端
-pip install qn1[all]
+| Repo | Description | Stars |
+|------|-------------|-------|
+| [ringbuffer](https://github.com/CN-QN1-dalin/ringbuffer) | O(1) KV Cache for llama.cpp — one-line API | ⭐ |
+| [ultra-infer](https://github.com/CN-QN1-dalin/ultra-infer) | DeepSeek V4 Flash engine — 284B on 16GB | ⭐ |
+| [benchmarks](https://github.com/CN-QN1-dalin/benchmarks) | Reproducible performance data | ⭐ |
+| [llama.cpp fork](https://github.com/CN-QN1-dalin/llama.cpp) | Upstream PR with RingBuffer | ⭐ |
+
+## RingBuffer: One Line, O(1)
+
+```cpp
+llama_memory_set_n_kv_max(mem, 16);  // That's it. O(1) from here.
 ```
 
-> 详细安装指引 → [docs/QUICKSTART.md](docs/QUICKSTART.md)
+| Context | Standard | RingBuffer | Speedup |
+|---------|----------|------------|---------|
+| 4K      | 8.3 t/s  | 10.5 t/s   | 1.27x   |
+| 64K     | ~2 t/s   | ~10 t/s    | ~5x     |
 
----
+→ [Full benchmarks](https://github.com/CN-QN1-dalin/benchmarks)  
+→ [llama.cpp PR #23743](https://github.com/ggml-org/llama.cpp/pull/23743)
 
-## 🚀 一行替换
+## QN1 Pro
 
-```python
-from qn1 import auto
+The open-source RingBuffer gives you O(1) decode. QN1 Pro adds **semantic retrieval** so you don't lose context:
 
-# 自动检测模型、后端、最优引擎
-engine = auto("Qwen2.5-7B-Instruct-4bit")
+| Feature | RingBuffer (free) | QN1 Pro |
+|---------|:---:|:---:|
+| O(1) decode | ✅ | ✅ |
+| Semantic retrieval | ❌ | ✅ SignalField |
+| KV compression | ❌ | ✅ 归元SSM (99%) |
+| Fast adaptation | ❌ | ✅ 灵芽 (36% < LoRA) |
+| Multi-backend | llama.cpp | MLX + PyTorch + llama.cpp |
 
-output = engine.generate("用三句话解释量子计算")
-print(output)
-```
+→ [qn1.ai](https://qn1.ai)
 
-### MLX（macOS）
-
-```python
-from mlx_lm import load
-from qn1 import monkey_patch
-
-model, tokenizer = load("Qwen2.5-7B-Instruct-4bit")
-monkey_patch(model, preset="lite")
-
-output = model.generate("解释 Transformer 工作原理", tokenizer=tokenizer)
-```
-
-### GGUF（跨平台 CPU）
-
-```python
-from qn1 import create_llama_engine
-
-engine = create_llama_engine("/path/to/model.gguf")
-output = engine.generate("写一个快速排序")
-```
-
----
-
-## ✨ 核心特性
-
-| 特性 | 说明 |
-|------|------|
-| **零训练替换** | 无需重新训练，一行代码替换原注意力机制 |
-| **三端统一 API** | MLX · GGUF · PyTorch 同一套接口 |
-| **RingBuffer™** | O(1) KV 缓存，上下文越长优势越大 |
-| **Hetero 异构** | GPU 近场 + CPU 锚点池 + α 自适应融合 |
-| **归元锁™** | 四层道家加密体系，保护核心 IP |
-
----
-
-## 📊 效果数据
-
-> macOS M1 Pro 16GB + Qwen2.5-7B-Instruct-Q4_K_M
-
-| 上下文 | 标准内存 | QN1 RingBuffer | 节省 |
-|--------|---------|----------------|:----:|
-| 1K     | 14 MB   | 14 MB          | 1.0× |
-| 8K     | 112 MB  | **0.5 MB**     | **224×** |
-| 16K    | 224 MB  | **0.5 MB**     | **462×** |
-| 32K+   | → OOM   | **→ 继续运行** | **∞** |
-
-> 更多数据 → [docs/PERFORMANCE.md](docs/PERFORMANCE.md)
-
----
-
-## 🛡️ 归元锁（独立产品）
-
-四层防御体系：
+## Architecture
 
 ```
-无形  →  C 扩展编译 (.so / .dylib)
-散气  →  五路种子推演（混淆调用链）
-渐退  →  质量腐朽（反调试反破解）
-归元  →  破解静默降级
+┌─────────────────────────────────────────┐
+│              QN1 Engine                  │
+├─────────────────────────────────────────┤
+│  RingBuffer (free)     O(1) KV window   │
+│  SignalField (Pro)     Semantic search  │
+│  归元SSM (Pro)         KV compression   │
+│  灵芽 (Pro)            Fast adaptation  │
+└─────────────────────────────────────────┘
 ```
 
-```bash
-pip install guiyuan-lock
-```
+## Team
 
-| 方案 | 价格 | 内容 |
-|------|------|------|
-| Free | ¥0 | Python 混淆 + 五路推演 |
-| Pro 月付 | ¥9.9/月 | C 扩展 + 质量腐朽 + 哨兵 |
-| Pro 年付 | ¥49.9/年 | 省 ¥69 |
+**CN_SJZ-QN1-大林** — Founder. Reverse-engineered DeepSeek V4 Flash (284B MoE). Built the first O(1) KV cache integration for llama.cpp. Located in Shijiazhuang, China.
 
----
+→ [GitHub](https://github.com/CN-QN1-dalin)
 
-## 💰 定价
+## License
 
-| 方案 | 价格 | 说明 |
-|------|------|:----:|
-| **QN1 Free** | ¥0 | MLX RingBuffer · 4bit · 7B · 32K |
-| **QN1 Pro 月付** | ¥99/月 | 全量化 · 全模型 · 128K · PyTorch hetero |
-| **QN1 Pro 年付** | ¥980/年 | Pro × 12 → 省 ¥208 |
-
-> 购买 → [ClawHub](https://clawhub.com) · 搜索 `qn1`
+- Open source components: MIT
+- QN1 Pro SDK: Commercial license
+- Contact: contact@qn1.ai
 
 ---
 
-## 🔧 开发环境
-
-| 环境 | 要求 |
-|------|------|
-| Python | ≥ 3.10 |
-| MLX   | ≥ 0.31（macOS Apple Silicon） |
-| PyTorch | ≥ 2.0（GPU 后端） |
-| llama-cpp-python | ≥ 0.3（GGUF 后端） |
-
-```bash
-git clone https://github.com/CN-QN1-dalin/qn1-sdk.git
-cd qn1-sdk
-pip install -e .
-```
-
-> 完整开发指引 → [CONTRIBUTING.md](CONTRIBUTING.md)
-
----
-
-## 🌐 兼容性
-
-| 环境 | 状态 |
-|------|:----:|
-| macOS Apple Silicon + MLX | ✅ |
-| Linux x86_64 + CPU（GGUF） | ✅ |
-| Linux x86_64 + NVIDIA（PyTorch） | ✅ |
-| Windows x86_64 + CPU（GGUF） | ✅ 待测 |
-| macOS Intel | 🔄 开发中 |
-
----
-
-## 📄 许可
-
-专有软件 © 念动幻化 QN1 · CN_SJZ-QN1-大林
-
-未经授权不得复制、分发、反编译核心引擎源码。
-
----
-
-<p align="center">
-  <sub>QN1 — 一念凝核，幻化全域引擎</sub>
-</p>
+> **一行代码，O(1)解码。**
